@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+  web:
+    build: ./backend
+    command: python3 manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  client:
+    build:
+      context: ./frontend
+      args:
+        - GIT_REVISION=${REVISION:-latest}
+    image: client:${REVISION:-latest}
+    environment:
+      - NODE_ENV
+      - CODECOV_TOKEN
+      - REACT_APP_API_HOST
+      - REACT_APP_CLIENT_HOST
+      - REACT_APP_CLIENT_PORT
+    ports:
+      - "3000:3000"
